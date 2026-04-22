@@ -75,11 +75,25 @@
   .stat-num { font-size: 18px; }
 
   .controls { display: flex; gap: 10px; }
+
+  .btn-sound {
+    background: white;
+    border: 1px solid var(--border);
+    color: var(--text-dark);
+    font-weight: 700;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .btn-sound:hover { background: #f1f5f9; }
+
   .btn-summary {
     background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none;
     font-weight: 700; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: 0.2s; box-shadow: var(--btn-shadow);
   }
   .btn-summary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
   .btn-reset {
     background: white; border: 1px solid var(--border); color: var(--text-dark);
     font-weight: 700; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: 0.2s;
@@ -198,7 +212,7 @@
     .header { flex-direction: column; gap: 15px; padding: 15px; }
     .brand { width: 100%; justify-content: center; }
     .header-center { width: 100%; justify-content: space-between; }
-    .controls { width: 100%; justify-content: space-between; }
+    .controls { width: 100%; justify-content: space-between; flex-wrap: wrap; }
     .grid { grid-template-columns: 1fr; }
   }
 </style>
@@ -219,6 +233,7 @@
   </div>
 
   <div class="controls">
+    <button class="btn-sound" id="soundToggle" onclick="toggleSound()">🔊 Звук: вкл</button>
     <button class="btn-summary" onclick="showSummary()">Подвести итоги</button>
     <button class="btn-reset" onclick="resetAll()">Сбросить</button>
   </div>
@@ -355,27 +370,44 @@ const db = [
   { q: 'Если точка лежит на биссектрисе угла, то она равноудалена от сторон этого угла.', a: true, e: 'Каждая точка биссектрисы неразвернутого угла равноудалена от его сторон.', draw: svgs.bisectorPoint }
 ];
 
-let sC = 0; let sW = 0;
+let sC = 0;
+let sW = 0;
+let soundEnabled = true;
 let wrongAnswers = [];
 let activeQuestions = [];
 const actx = new (window.AudioContext || window.webkitAudioContext)();
 
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  const btn = document.getElementById("soundToggle");
+  btn.innerText = soundEnabled ? "🔊 Звук: вкл" : "🔇 Звук: выкл";
+}
+
 function beep(ok) {
+  if (!soundEnabled) return;
   if (actx.state === 'suspended') actx.resume();
+
   const o = actx.createOscillator();
   const g = actx.createGain();
-  o.connect(g); g.connect(actx.destination);
+  o.connect(g);
+  g.connect(actx.destination);
   
   if (ok) {
-    o.type = 'sine'; o.frequency.setValueAtTime(600, actx.currentTime);
+    o.type = 'sine';
+    o.frequency.setValueAtTime(600, actx.currentTime);
     o.frequency.exponentialRampToValueAtTime(1200, actx.currentTime + 0.1);
-    g.gain.setValueAtTime(0.5, actx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.3);
-    o.start(); o.stop(actx.currentTime + 0.3);
+    g.gain.setValueAtTime(0.5, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.3);
+    o.start();
+    o.stop(actx.currentTime + 0.3);
   } else {
-    o.type = 'sawtooth'; o.frequency.setValueAtTime(150, actx.currentTime);
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(150, actx.currentTime);
     o.frequency.exponentialRampToValueAtTime(100, actx.currentTime + 0.2);
-    g.gain.setValueAtTime(0.3, actx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.4);
-    o.start(); o.stop(actx.currentTime + 0.4);
+    g.gain.setValueAtTime(0.3, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.4);
+    o.start();
+    o.stop(actx.currentTime + 0.4);
   }
 }
 
@@ -426,12 +458,16 @@ function ans(index, userSays) {
   const title = document.getElementById(`rt-${index}`);
   const back = document.getElementById(`cb-${index}`);
   if (ok) {
-    sC++; document.getElementById("sCorr").innerText = sC;
-    title.innerText = "ПРАВИЛЬНО!"; title.style.color = "var(--correct)";
+    sC++;
+    document.getElementById("sCorr").innerText = sC;
+    title.innerText = "ПРАВИЛЬНО!";
+    title.style.color = "var(--correct)";
     back.style.borderColor = "var(--correct)";
   } else {
-    sW++; document.getElementById("sWrng").innerText = sW;
-    title.innerText = "ОШИБКА!"; title.style.color = "var(--wrong)";
+    sW++;
+    document.getElementById("sWrng").innerText = sW;
+    title.innerText = "ОШИБКА!";
+    title.style.color = "var(--wrong)";
     back.style.borderColor = "var(--wrong)";
     wrongAnswers.push(q);
   }
@@ -458,8 +494,21 @@ function showSummary() {
   modal.style.display = 'flex';
 }
 
-function closeSummary() { document.getElementById('summaryModal').style.display = 'none'; }
-function resetAll() { if(confirm("Начать заново? Статистика обнулится.")) { sC = 0; sW = 0; wrongAnswers = []; document.getElementById("sCorr").innerText = "0"; document.getElementById("sWrng").innerText = "0"; render(); } }
+function closeSummary() {
+  document.getElementById('summaryModal').style.display = 'none';
+}
+
+function resetAll() {
+  if (confirm("Начать заново? Статистика обнулится.")) {
+    sC = 0;
+    sW = 0;
+    wrongAnswers = [];
+    document.getElementById("sCorr").innerText = "0";
+    document.getElementById("sWrng").innerText = "0";
+    render();
+  }
+}
+
 render();
 </script>
 </body>
