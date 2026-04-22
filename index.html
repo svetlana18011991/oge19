@@ -1,1 +1,466 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ОГЭ: Задание 19</title>
+<style>
+  :root {
+    --bg-main: #f8fafc;
+    --card-bg: #ffffff;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --correct: #10b981;
+    --correct-bg: #d1fae5;
+    --wrong: #ef4444;
+    --wrong-bg: #fee2e2;
+    --border: #e2e8f0;
+    --btn-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  }
 
+  * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+  body {
+    margin: 0; padding: 0; background-color: var(--bg-main); color: var(--text-dark);
+    display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+  }
+
+  .header {
+    background: var(--card-bg); padding: 15px 30px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center; z-index: 10;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05); flex-shrink: 0;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+
+  .header-logo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    display: block;
+    animation: softPulse 2.6s ease-in-out infinite;
+  }
+
+  @keyframes softPulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+      filter: drop-shadow(0 0 0 rgba(59,130,246,0));
+    }
+    50% {
+      transform: scale(1.06);
+      opacity: 0.92;
+      filter: drop-shadow(0 0 10px rgba(59,130,246,0.22));
+    }
+  }
+
+  .title { font-size: 22px; font-weight: 900; color: var(--text-dark); margin: 0; letter-spacing: 0.5px;}
+
+  .header-center { display: flex; gap: 15px; align-items: center; }
+  .stat-pill { padding: 6px 16px; border-radius: 20px; font-weight: 800; font-size: 14px; display: flex; gap: 8px; align-items: center; }
+  .pill-c { background: var(--correct-bg); color: #047857; border: 1px solid #a7f3d0; }
+  .pill-w { background: var(--wrong-bg); color: #b91c1c; border: 1px solid #fecaca; }
+  .stat-num { font-size: 18px; }
+
+  .controls { display: flex; gap: 10px; }
+  .btn-summary {
+    background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none;
+    font-weight: 700; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: 0.2s; box-shadow: var(--btn-shadow);
+  }
+  .btn-summary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .btn-reset {
+    background: white; border: 1px solid var(--border); color: var(--text-dark);
+    font-weight: 700; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: 0.2s;
+  }
+  .btn-reset:hover { background: #f1f5f9; }
+
+  .main-scroll { flex: 1; overflow-y: auto; padding: 30px; }
+  .main-scroll::-webkit-scrollbar { width: 8px; }
+  .main-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px; max-width: 1400px; margin: 0 auto;
+  }
+
+  .card-wrap { perspective: 1500px; height: 380px; }
+  .card-inner {
+    width: 100%; height: 100%; position: relative;
+    transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+    transform-style: preserve-3d;
+  }
+  
+  .card-wrap.flipped .card-inner { transform: rotateY(-180deg); }
+
+  .card-face {
+    position: absolute; inset: 0; 
+    backface-visibility: hidden; -webkit-backface-visibility: hidden; 
+    background: var(--card-bg); border-radius: 16px; padding: 20px;
+    border: 1px solid var(--border); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+  }
+
+  .card-front { 
+    transform: rotateY(0deg); 
+    display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2; 
+  }
+  .c-num { color: #94a3b8; font-size: 12px; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;}
+  .statement { font-size: 16px; font-weight: 600; line-height: 1.5; color: var(--text-dark); flex: 1; display: flex; align-items: center; text-align: center; }
+  
+  .btn-row { display: flex; gap: 10px; width: 100%; margin-top: 15px; }
+  .btn-ans {
+    flex: 1; padding: 14px; border: none; border-radius: 8px; font-weight: 700;
+    font-size: 14px; cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px;
+  }
+  .btn-t { background: #f0fdf4; color: var(--correct); border: 2px solid #a7f3d0;}
+  .btn-t:hover:not(:disabled) { background: var(--correct); color: white; border-color: var(--correct); box-shadow: 0 0 15px rgba(16,185,129,0.3);}
+  .btn-f { background: #fef2f2; color: var(--wrong); border: 2px solid #fecaca;}
+  .btn-f:hover:not(:disabled) { background: var(--wrong); color: white; border-color: var(--wrong); box-shadow: 0 0 15px rgba(239,68,68,0.3);}
+  .btn-ans:disabled { opacity: 0.5; cursor: default; }
+
+  .card-back { 
+    transform: rotateY(180deg); 
+    border-width: 2px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: flex-start;
+    z-index: 1;
+  }
+  
+  .res-title { font-size: 22px; font-weight: 900; margin-bottom: 10px; text-transform: uppercase; flex-shrink: 0; }
+  
+  .fact-badge {
+    font-size: 12px; font-weight: bold; background: var(--bg-main);
+    padding: 6px 12px; border-radius: 6px; color: var(--text-muted); 
+    margin-bottom: 15px; flex-shrink: 0;
+  }
+  
+  .svg-box { 
+    height: 100px; 
+    width: 100%; 
+    margin-bottom: 15px; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    flex-shrink: 0; 
+  }
+  .svg-box svg { max-height: 100%; max-width: 100%; }
+  
+  .expl-text { 
+    font-size: 14px; line-height: 1.5; color: var(--text-dark); 
+    overflow-y: auto; padding: 0 5px; flex: 1; display: flex; 
+    flex-direction: column; align-items: center; justify-content: center; 
+    text-align: center; width: 100%;
+  }
+  .expl-text::-webkit-scrollbar { width: 4px; }
+  .expl-text::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+  .frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; margin: 0 4px; font-size: 0.9em; line-height: 1.2; }
+  .frac .num { border-bottom: 1px solid currentColor; padding: 0 2px; }
+  .frac .den { padding: 0 2px; }
+  .math-line { display: inline-flex; align-items: center; justify-content: center; flex-wrap: wrap; margin-top: 5px; width: 100%;}
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(15,23,42,0.8); backdrop-filter: blur(4px);
+    display: none; align-items: center; justify-content: center; z-index: 1000;
+  }
+  .modal {
+    background: var(--card-bg); width: 90%; max-width: 800px; max-height: 85vh;
+    border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .modal-head { padding: 20px 30px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #f8fafc;}
+  .modal-head h2 { margin: 0; color: var(--text-dark); }
+  .btn-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-muted); }
+  .btn-close:hover { color: var(--text-dark); }
+  
+  .modal-body { padding: 30px; overflow-y: auto; flex: 1; }
+  
+  .success-msg { text-align: center; color: var(--correct); font-size: 24px; font-weight: 800; padding: 40px 0; }
+  .error-list { display: flex; flex-direction: column; gap: 15px; }
+  .error-item { background: #fff; border: 1px solid var(--wrong-bg); border-left: 4px solid var(--wrong); padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);}
+  .err-q { font-weight: bold; font-size: 15px; margin-bottom: 8px; color: var(--text-dark); }
+  .err-e { font-size: 14px; color: #475569; }
+
+  @media (max-width: 768px) {
+    .header { flex-direction: column; gap: 15px; padding: 15px; }
+    .brand { width: 100%; justify-content: center; }
+    .header-center { width: 100%; justify-content: space-between; }
+    .controls { width: 100%; justify-content: space-between; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="brand">
+    <a class="logo-link" href="https://t.me/interactiv_matematika" target="_blank" rel="noopener noreferrer" aria-label="Перейти в Telegram">
+      <img src="logo.png" alt="Логотип" class="header-logo">
+    </a>
+    <h1 class="title">ОГЭ: Задание 19</h1>
+  </div>
+
+  <div class="header-center">
+    <div class="stat-pill pill-c">ВЕРНО: <span class="stat-num" id="sCorr">0</span></div>
+    <div class="stat-pill pill-w">ОШИБОК: <span class="stat-num" id="sWrng">0</span></div>
+  </div>
+
+  <div class="controls">
+    <button class="btn-summary" onclick="showSummary()">Подвести итоги</button>
+    <button class="btn-reset" onclick="resetAll()">Сбросить</button>
+  </div>
+</header>
+
+<main class="main-scroll">
+  <div class="grid" id="grid"></div>
+</main>
+
+<div class="modal-overlay" id="summaryModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Итоги тренировки</h2>
+      <button class="btn-close" onclick="closeSummary()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const svgs = {
+  isosceles: `<svg viewBox="0 0 100 80"><polygon points="50,10 15,70 85,70" fill="none" stroke="#3b82f6" stroke-width="2"/><path d="M 42,24 Q 50,30 58,24" fill="none" stroke="#ef4444" stroke-width="2"/><path d="M 40,28 Q 50,34 60,28" fill="none" stroke="#ef4444" stroke-width="2"/><path d="M 28,70 Q 28,62 21,60" fill="none" stroke="#ef4444" stroke-width="2"/><path d="M 72,70 Q 72,62 79,60" fill="none" stroke="#ef4444" stroke-width="2"/></svg>`,
+  obtuse: `<svg viewBox="0 0 100 80">
+    <polygon points="30,70 90,70 10,30" fill="none" stroke="#3b82f6" stroke-width="2"/>
+    <path d="M 42,70 A 12 12 0 0 0 24.6,59.3" fill="none" stroke="#ef4444" stroke-width="2"/>
+  </svg>`,
+  rightTri: `<svg viewBox="0 0 100 80"><polygon points="20,70 80,70 20,20" fill="none" stroke="#3b82f6" stroke-width="2"/><polyline points="20,60 30,60 30,70" fill="none" stroke="#3b82f6" stroke-width="1"/></svg>`,
+  triangleArea: `<svg viewBox="0 0 100 80"><polygon points="10,70 90,70 40,20" fill="none" stroke="#3b82f6" stroke-width="2"/><path d="M 25,70 Q 22,60 17,58" fill="none" stroke="#ef4444" stroke-width="2"/><text x="50" y="80" font-size="10" fill="#3b82f6">a</text><text x="15" y="40" font-size="10" fill="#3b82f6">b</text></svg>`,
+  twoEq: `<svg viewBox="0 0 100 80"><polygon points="30,20 10,60 50,60" fill="none" stroke="#3b82f6" stroke-width="2"/><polygon points="75,40 60,70 90,70" fill="none" stroke="#3b82f6" stroke-width="2"/></svg>`,
+  pythagoras: `<svg viewBox="0 0 100 80"><polygon points="30,60 70,60 30,30" fill="none" stroke="#3b82f6" stroke-width="2"/><polyline points="30,50 40,50 40,60" fill="none" stroke="#3b82f6" stroke-width="1"/><text x="50" y="75" text-anchor="middle" font-size="12" fill="#ef4444">c² = a² + b²</text></svg>`,
+  rightTriAcute: `<svg viewBox="0 0 100 80"><polygon points="20,70 80,70 20,20" fill="none" stroke="#3b82f6" stroke-width="2"/><polyline points="20,60 30,60 30,70" fill="none" stroke="#3b82f6" stroke-width="1"/><path d="M 65,70 A 15 15 0 0 0 68,60" fill="none" stroke="#ef4444" stroke-width="2"/></svg>`,
+  eqHeights: `<svg viewBox="0 0 100 80"><polygon points="50,10 15,70 85,70" fill="none" stroke="#3b82f6" stroke-width="2"/><line x1="50" y1="10" x2="50" y2="70" stroke="#ef4444" stroke-width="1"/></svg>`,
+  incircle: `<svg viewBox="0 0 100 80"><polygon points="50,10 15.3,70 84.7,70" fill="none" stroke="#3b82f6" stroke-width="2"/><circle cx="50" cy="50" r="20" fill="none" stroke="#3b82f6" stroke-width="2"/></svg>`,
+  circumcenter: `<svg viewBox="0 0 100 80"><circle cx="50" cy="45" r="30" fill="none" stroke="#3b82f6" stroke-width="2"/><polygon points="50,15 26,63 74,63" fill="none" stroke="#3b82f6" stroke-width="2"/><line x1="50" y1="10" x2="50" y2="70" stroke="#ef4444" stroke-width="1" stroke-dasharray="3"/><line x1="26" y1="33" x2="62" y2="51" stroke="#ef4444" stroke-width="1" stroke-dasharray="3"/><line x1="38" y1="51" x2="74" y2="33" stroke="#ef4444" stroke-width="1" stroke-dasharray="3"/><polyline points="50,60 53,60 53,63" fill="none" stroke="#ef4444" stroke-width="1"/><polyline points="40.7,40.3 39.3,43.0 36.7,41.7" fill="none" stroke="#ef4444" stroke-width="1"/><polyline points="59.3,40.3 60.7,43.0 63.3,41.7" fill="none" stroke="#ef4444" stroke-width="1"/><circle cx="50" cy="45" r="2.5" fill="#ef4444"/></svg>`,
+  circumOut: `<svg viewBox="0 0 100 80">
+    <circle cx="50" cy="45" r="35" fill="none" stroke="#3b82f6" stroke-width="2"/>
+    <polygon points="19.69,27.5 67.5,14.69 82.89,56.97" fill="none" stroke="#ef4444" stroke-width="2"/>
+    <circle cx="50" cy="45" r="3" fill="#3b82f6"/>
+  </svg>`,
+  notEqSides: `<svg viewBox="0 0 100 80"><polygon points="20,20 10,60 50,60" fill="none" stroke="#3b82f6" stroke-width="2"/><polygon points="70,20 60,60 95,50" fill="none" stroke="#3b82f6" stroke-width="2"/></svg>`,
+  acuteTri: `<svg viewBox="0 0 100 80"><polygon points="50,20 20,70 90,60" fill="none" stroke="#3b82f6" stroke-width="2"/><text x="40" y="45" font-size="10" fill="#ef4444">&lt;60°</text></svg>`,
+  largeSideAngle: `<svg viewBox="0 0 100 80"><polygon points="10,70 90,70 80,20" fill="none" stroke="#3b82f6" stroke-width="2"/><line x1="10" y1="70" x2="90" y2="70" stroke="#ef4444" stroke-width="3"/></svg>`,
+  median: `<svg viewBox="0 0 100 80"><polygon points="50,10 10,70 90,70" fill="none" stroke="#3b82f6" stroke-width="2"/><line x1="50" y1="10" x2="50" y2="70" stroke="#ef4444" stroke-width="2"/></svg>`,
+  square: `<svg viewBox="0 0 100 80"><rect x="30" y="20" width="40" height="40" fill="none" stroke="#3b82f6" stroke-width="2"/><polyline points="30,30 35,30 35,20" fill="none" stroke="#3b82f6" stroke-width="1"/><polyline points="70,30 65,30 65,20" fill="none" stroke="#3b82f6" stroke-width="1"/><polyline points="70,50 65,50 65,60" fill="none" stroke="#3b82f6" stroke-width="1"/><polyline points="30,50 35,50 35,60" fill="none" stroke="#3b82f6" stroke-width="1"/></svg>`,
+  trapDiag: `<svg viewBox="0 0 100 80"><polygon points="20,20 60,20 80,70 10,70" fill="none" stroke="#3b82f6" stroke-width="2"/></svg>`,
+  rhombusSlant: `<svg viewBox="0 0 100 80"><polygon points="40,10 80,40 40,70 0,40" fill="none" stroke="#3b82f6" stroke-width="2"/></svg>`,
+  rightTrap: `<svg viewBox="0 0 100 80"><polygon points="20,20 60,20 80,70 20,70" fill="none" stroke="#3b82f6" stroke-width="2"/><polyline points="20,30 30,30 30,20" fill="none" stroke="#ef4444" stroke-width="2"/><polyline points="20,60 30,60 30,70" fill="none" stroke="#ef4444" stroke-width="2"/></svg>`,
+  parallelogram: `<svg viewBox="0 0 100 80"><polygon points="30,20 90,20 70,70 10,70" fill="none" stroke="#3b82f6" stroke-width="2"/><path d="M 25,70 Q 25,60 16,56" fill="none" stroke="#ef4444" stroke-width="2"/><path d="M 75,20 Q 75,30 84,34" fill="none" stroke="#ef4444" stroke-width="2"/></svg>`,
+  rhombusDiag: `<svg viewBox="0 0 100 80"><polygon points="50,10 90,40 50,70 10,40" fill="none" stroke="#3b82f6" stroke-width="2"/><line x1="50" y1="10" x2="50" y2="70" stroke="#ef4444" stroke-dasharray="4"/><line x1="10" y1="40" x2="90" y2="40" stroke="#ef4444" stroke-dasharray="4"/></svg>`,
+  rhombusArea: `<svg viewBox="0 0 100 80"><polygon points="40,10 80,40 40,70 0,40" fill="none" stroke="#3b82f6" stroke-width="2"/><line x1="40" y1="10" x2="40" y2="70" stroke="#ef4444" stroke-dasharray="4"/><text x="45" y="45" font-size="12" fill="#ef4444">h</text></svg>`,
+  trapParallel: `<svg viewBox="0 0 100 80"><polygon points="30,20 70,20 90,70 10,70" fill="none" stroke="#3b82f6" stroke-width="2"/><path d="M 45,20 L 50,15 L 50,25 Z" fill="#ef4444"/><path d="M 45,70 L 50,65 L 50,75 Z" fill="#ef4444"/></svg>`,
+  isoTrapDiag: `<svg viewBox="0 0 100 80"><polygon points="30,20 70,20 90,70 10,70" fill="none" stroke="#3b82f6" stroke-width="2"/><line x1="30" y1="20" x2="90" y2="70" stroke="#ef4444" stroke-width="1"/><line x1="70" y1="20" x2="10" y2="70" stroke="#ef4444" stroke-width="1"/></svg>`,
+  trapMid: `<svg viewBox="0 0 100 80"><polygon points="30,20 70,20 90,70 10,70" fill="none" stroke="#3b82f6" stroke-width="2"/><line x1="20" y1="45" x2="80" y2="45" stroke="#ef4444" stroke-width="2" stroke-dasharray="4"/><text x="45" y="40" font-size="12" fill="#ef4444">L</text></svg>`,
+  rectDiag: `<svg viewBox="0 0 100 80"><rect x="20" y="20" width="60" height="40" fill="none" stroke="#3b82f6" stroke-width="2"/><line x1="20" y1="20" x2="80" y2="60" stroke="#ef4444" stroke-width="1"/><line x1="20" y1="60" x2="80" y2="20" stroke="#ef4444" stroke-width="1"/></svg>`,
+  circleRad: `<svg viewBox="0 0 100 80"><circle cx="50" cy="40" r="35" fill="none" stroke="#3b82f6" stroke-width="2"/><circle cx="50" cy="40" r="2" fill="#ef4444"/><line x1="50" y1="40" x2="85" y2="40" stroke="#ef4444" stroke-width="2"/></svg>`,
+  diameters: `<svg viewBox="0 0 100 80"><circle cx="50" cy="40" r="35" fill="none" stroke="#3b82f6" stroke-width="2"/><line x1="15" y1="40" x2="85" y2="40" stroke="#ef4444" stroke-width="2"/><line x1="50" y1="5" x2="50" y2="75" stroke="#ef4444" stroke-width="2"/></svg>`,
+  chords: `<svg viewBox="0 0 100 80"><circle cx="50" cy="40" r="35" fill="none" stroke="#3b82f6" stroke-width="2"/><line x1="15" y1="40" x2="85" y2="40" stroke="#ef4444" stroke-width="2"/><line x1="30" y1="10" x2="70" y2="10" stroke="#ef4444" stroke-width="2"/></svg>`,
+  inscribedCentral: `<svg viewBox="0 0 100 80"><circle cx="50" cy="40" r="35" fill="none" stroke="#3b82f6" stroke-width="2"/><polygon points="50,40 20,60 80,60" fill="none" stroke="#ef4444" stroke-width="1"/><polygon points="50,5 20,60 80,60" fill="none" stroke="#3b82f6" stroke-width="2"/></svg>`,
+  rhombusIncircle: `<svg viewBox="0 0 100 80"><polygon points="50,5 90,40 50,75 10,40" fill="none" stroke="#3b82f6" stroke-width="2"/><circle cx="50" cy="40" r="21" fill="none" stroke="#ef4444" stroke-width="2"/></svg>`,
+  rectCircumcircle: `<svg viewBox="0 0 100 80"><circle cx="50" cy="40" r="35" fill="none" stroke="#3b82f6" stroke-width="2"/><rect x="25" y="15" width="50" height="50" fill="none" stroke="#ef4444" stroke-width="2"/></svg>`,
+  tangentsOut: `<svg viewBox="0 0 100 80"><circle cx="70" cy="40" r="25" fill="none" stroke="#3b82f6" stroke-width="2"/><line x1="10" y1="40" x2="65" y2="15" stroke="#ef4444" stroke-width="2"/><line x1="10" y1="40" x2="65" y2="65" stroke="#ef4444" stroke-width="2"/></svg>`,
+  tangentRad: `<svg viewBox="0 0 100 80">
+    <circle cx="50" cy="30" r="25" fill="none" stroke="#3b82f6" stroke-width="2"/>
+    <line x1="10" y1="55" x2="90" y2="55" stroke="#3b82f6" stroke-width="2"/>
+    <line x1="50" y1="30" x2="50" y2="55" stroke="#ef4444" stroke-width="2"/>
+    <polyline points="50,50 55,50 55,55" fill="none" stroke="#ef4444" stroke-width="2"/>
+  </svg>`,
+  inscribed90: `<svg viewBox="0 0 100 80"><circle cx="50" cy="45" r="35" fill="none" stroke="#3b82f6" stroke-width="2"/><line x1="15" y1="45" x2="85" y2="45" stroke="#3b82f6" stroke-width="2"/><polygon points="15,45 50,10 85,45" fill="none" stroke="#ef4444" stroke-width="2"/><polyline points="47,13 50,17 53,13" fill="none" stroke="#ef4444" stroke-width="2"/></svg>`,
+  adjacent90: `<svg viewBox="0 0 100 80"><line x1="10" y1="60" x2="90" y2="60" stroke="#3b82f6" stroke-width="2"/><line x1="50" y1="60" x2="50" y2="10" stroke="#ef4444" stroke-width="2"/><polyline points="50,50 40,50 40,60" fill="none" stroke="#ef4444" stroke-width="2"/><polyline points="50,50 60,50 60,60" fill="none" stroke="#ef4444" stroke-width="2"/></svg>`,
+  verticalAngles: `<svg viewBox="0 0 100 80"><line x1="20" y1="20" x2="80" y2="60" stroke="#3b82f6" stroke-width="2"/><line x1="20" y1="60" x2="80" y2="20" stroke="#3b82f6" stroke-width="2"/><path d="M 42,34 Q 50,28 58,34" fill="none" stroke="#ef4444" stroke-width="2"/><path d="M 42,46 Q 50,52 58,46" fill="none" stroke="#ef4444" stroke-width="2"/></svg>`,
+  parallelPerp: `<svg viewBox="0 0 100 80"><line x1="10" y1="40" x2="90" y2="40" stroke="#3b82f6" stroke-width="2"/><line x1="30" y1="10" x2="30" y2="70" stroke="#ef4444" stroke-width="2"/><line x1="70" y1="10" x2="70" y2="70" stroke="#ef4444" stroke-width="2"/><polyline points="30,30 35,30 35,40" fill="none" stroke="#3b82f6" stroke-width="1"/><polyline points="70,30 75,30 75,40" fill="none" stroke="#3b82f6" stroke-width="1"/></svg>`,
+  pointLines: `<svg viewBox="0 0 100 80"><line x1="10" y1="10" x2="90" y2="70" stroke="#3b82f6" stroke-width="1"/><line x1="50" y1="5" x2="50" y2="75" stroke="#3b82f6" stroke-width="1"/><circle cx="50" cy="40" r="3" fill="#ef4444"/></svg>`,
+  midPerpPoint: `<svg viewBox="0 0 100 80"><line x1="20" y1="60" x2="80" y2="60" stroke="#3b82f6" stroke-width="2"/><circle cx="50" cy="20" r="2" fill="#ef4444"/></svg>`,
+  bisectorPoint: `<svg viewBox="0 0 100 80"><polyline points="10,10 10,70 90,70" fill="none" stroke="#3b82f6" stroke-width="2"/><line x1="10" y1="70" x2="70" y2="10" stroke="#ef4444" stroke-dasharray="4"/></svg>`,
+  parallelAxiom: `<svg viewBox="0 0 100 80"><line x1="10" y1="60" x2="90" y2="60" stroke="#3b82f6" stroke-width="2"/><circle cx="50" cy="20" r="3" fill="#ef4444"/><line x1="10" y1="20" x2="90" y2="20" stroke="#ef4444" stroke-dasharray="4"/></svg>`,
+  convexQuad: `<svg viewBox="0 0 100 80"><polygon points="20,20 80,30 90,70 10,60" fill="none" stroke="#3b82f6" stroke-width="2"/></svg>`
+};
+
+const db = [
+  { q: 'Площадь квадрата равна произведению двух его смежных сторон.', a: true, e: 'У квадрата смежные стороны равны a, поэтому его площадь равна произведению этих сторон: <div class="math-line">S = a · a = a²</div>', draw: svgs.square },
+  { q: 'Диагональ трапеции делит её на два равных треугольника.', a: false, e: 'Диагональ делит на два равных треугольника параллелограмм. У трапеции боковые стороны не параллельны, треугольники не равны.', draw: svgs.trapDiag },
+  { q: 'Если две стороны одного треугольника соответственно равны двум сторонам другого треугольника, то такие треугольники равны.', a: false, e: 'Для равенства треугольников по первому признаку необходимо равенство угла, заключенного между этими сторонами.', draw: svgs.notEqSides },
+  { q: 'Все углы ромба равны.', a: false, e: 'По свойству параллелограмма, попарно равны лишь противоположные углы. Равенство всех углов имеет место только у квадрата.', draw: svgs.rhombusSlant },
+  { q: 'Если стороны одного четырёхугольника соответственно равны сторонам другого четырёхугольника, то такие четырёхугольники равны.', a: false, e: 'Четырехугольники не являются жесткими фигурами. Квадрат и ромб с одинаковыми длинами сторон не равны между собой.', draw: svgs.rhombusSlant },
+  { q: 'Через любую точку, лежащую вне окружности, можно провести две касательные к этой окружности.', a: true, e: 'По теореме о касательных, из точки вне окружности можно провести ровно две касательные прямые.', draw: svgs.tangentsOut },
+  { q: 'Две прямые, перпендикулярные третьей прямой, перпендикулярны.', a: false, e: 'По теореме, две прямые на плоскости, перпендикулярные одной и той же прямой, параллельны друг другу.', draw: svgs.parallelPerp },
+  { q: 'В любой прямоугольной трапеции есть два равных угла.', a: true, e: 'По определению, прямоугольная трапеция имеет боковую сторону, перпендикулярную основаниям, образуя два угла по 90°.', draw: svgs.rightTrap },
+  { q: 'Все диаметры окружности равны между собой.', a: true, e: 'Диаметр равен удвоенному радиусу <div class="math-line">(D = 2R)</div> Поскольку радиус постоянен, все диаметры равны.', draw: svgs.diameters },
+  { q: 'Центр описанной около треугольника окружности всегда лежит внутри этого треугольника.', a: false, e: 'У тупоугольного треугольника центр описанной окружности лежит вне треугольника.', draw: svgs.circumOut },
+  { q: 'Сумма углов равнобедренного треугольника равна 180 градусам.', a: true, e: 'По теореме о сумме углов треугольника, сумма внутренних углов любого треугольника равна 180°, независимо от его вида.', draw: svgs.isosceles },
+  { q: 'Диагонали ромба равны.', a: false, e: 'Диагонали равны у прямоугольника и квадрата. У произвольного ромба они имеют различную длину.', draw: svgs.rhombusDiag },
+  { q: 'Диагонали ромба точкой пересечения делятся пополам.', a: true, e: 'Ромб является параллелограммом, а диагонали любого параллелограмма делятся точкой пересечения пополам.', draw: svgs.rhombusDiag },
+  { q: 'В тупоугольном треугольнике все углы тупые.', a: false, e: 'В треугольнике не может быть более одного тупого угла, так как в противном случае сумма углов превысила бы 180°.', draw: svgs.obtuse },
+  { q: 'Каждая из биссектрис равнобедренного треугольника является его высотой.', a: false, e: 'Свойством высоты и медианы обладает только та биссектриса, которая проведена к основанию треугольника.', draw: svgs.isoBisector },
+  { q: 'Расстояние от точки, лежащей на окружности, до центра окружности равно радиусу.', a: true, e: 'Это строгое геометрическое определение окружности.', draw: svgs.circleRad },
+  { q: 'Площадь трапеции равна произведению основания трапеции на высоту.', a: false, e: 'Площадь трапеции равна произведению полусуммы оснований на высоту: <div class="math-line">S = <span class="frac"><span class="num">a + b</span><span class="den">2</span></span> · h</div>', draw: svgs.trapMid },
+  { q: 'Треугольника со сторонами 1, 2, 4 не существует.', a: true, e: 'Для данных длин не выполняется неравенство треугольника: сумма двух меньших сторон должна быть больше третьей.', draw: null },
+  { q: 'Любые два равносторонних треугольника подобны.', a: true, e: 'В равностороннем треугольнике все углы равны 60°. Треугольники подобны по равенству соответствующих углов.', draw: svgs.twoEq },
+  { q: 'Длина гипотенузы прямоугольного треугольника меньше суммы длин его катетов.', a: true, e: 'Данное утверждение является следствием неравенства треугольника: любая сторона меньше суммы длин двух других сторон.', draw: svgs.rightTri },
+  { q: 'Средняя линия трапеции равна полусумме её оснований.', a: true, e: 'По теореме о средней линии трапеции, её длина равна полусумме оснований: <div class="math-line">L = <span class="frac"><span class="num">a + b</span><span class="den">2</span></span></div>', draw: svgs.trapMid },
+  { q: 'Вертикальные углы равны.', a: true, e: 'Утверждение является точной формулировкой теоремы о равенстве вертикальных углов.', draw: svgs.verticalAngles },
+  { q: 'Две прямые, параллельные третьей прямой, перпендикулярны.', a: false, e: 'По теореме, две прямые, параллельные одной и той же прямой, параллельны друг другу.', draw: svgs.parallelPerp },
+  { q: 'Диагонали любого прямоугольника делят его на четыре равных треугольника.', a: false, e: 'Они делят его на четыре равновеликих (по площади) треугольника, но равными (по форме и размеру) они будут только у квадрата.', draw: svgs.rectDiag },
+  { q: 'Все квадраты имеют равные площади.', a: false, e: 'Площадь квадрата зависит от длины его стороны.', draw: svgs.square },
+  { q: 'Основания равнобедренной трапеции равны.', a: false, e: 'У равнобедренной трапеции равны боковые стороны, а основания параллельны и имеют различную длину.', draw: svgs.isoTrapDiag },
+  { q: 'Вписанный угол, опирающийся на диаметр окружности, прямой.', a: true, e: 'Диаметр стягивает дугу 180°. По теореме о вписанном угле, он равен половине дуги, то есть <div class="math-line"><span class="frac"><span class="num">180°</span><span class="den">2</span></span> = 90°</div>', draw: svgs.inscribed90 },
+  { q: 'Если две стороны и угол одного треугольника равны соответственно двум сторонам и углу другого треугольника, то такие треугольники равны.', a: false, e: 'Для первого признака равенства треугольников угол обязательно должен находиться между равными сторонами.', draw: svgs.notEqSides },
+  { q: 'Площадь треугольника меньше произведения двух его сторон.', a: true, e: 'Площадь треугольника вычисляется по формуле <div class="math-line">S = <span class="frac"><span class="num">1</span><span class="den">2</span></span>ab sin(γ)</div> Так как <div class="math-line">sin(γ) ≤ 1</div>, то <div class="math-line">S ≤ <span class="frac"><span class="num">1</span><span class="den">2</span></span>ab &lt; ab</div>', draw: svgs.triangleArea },
+  { q: 'Средняя линия трапеции равна сумме её оснований.', a: false, e: 'Согласно теореме, длина средней линии трапеции равна полусумме её оснований: <div class="math-line">L = <span class="frac"><span class="num">a + b</span><span class="den">2</span></span></div>', draw: svgs.trapMid },
+  { q: 'Если два угла одного треугольника равны двум углам другого треугольника, то такие треугольники подобны.', a: true, e: 'Утверждение является точной формулировкой первого признака подобия треугольников.', draw: svgs.simAngles },
+  { q: 'Площадь ромба равна произведению его стороны на высоту, проведённую к этой стороне.', a: true, e: 'Ромб является параллелограммом, поэтому формула <div class="math-line">S = a · h</div> для него полностью справедлива.', draw: svgs.rhombusArea },
+  { q: 'Боковые стороны любой трапеции равны.', a: false, e: 'Равенство боковых сторон является свойством исключительно равнобедренной трапеции.', draw: svgs.trapDiag },
+  { q: 'Один из углов треугольника всегда не превышает 60 градусов.', a: true, e: 'Если допустить, что все углы строго больше 60°, то их сумма превысит 180°, что противоречит теореме о сумме углов треугольника.', draw: svgs.acuteTri },
+  { q: 'Если диагонали параллелограмма равны, то этот параллелограмм является ромбом.', a: false, e: 'Параллелограмм с равными диагоналями по признаку является прямоугольником, а не обязательно ромбом.', draw: svgs.rectDiag },
+  { q: 'Тангенс любого острого угла меньше единицы.', a: false, e: 'Тангенс угла больше 45° (например, 60°) превышает единицу.', draw: svgs.rightTriAcute },
+  { q: 'Любой прямоугольник можно вписать в окружность.', a: true, e: 'Сумма противоположных углов прямоугольника равна 180° (90° + 90°), что является необходимым и достаточным условием для вписанного четырехугольника.', draw: svgs.rectCircumcircle },
+  { q: 'Через заданную точку плоскости можно провести только одну прямую.', a: false, e: 'Через любую точку на плоскости можно провести бесконечное множество прямых.', draw: svgs.pointLines },
+  { q: 'Сумма углов прямоугольного треугольника равна 90 градусам.', a: false, e: 'Сумма углов любого треугольника равна 180°. Значению 90° равна сумма только двух острых углов прямоугольного треугольника.', draw: svgs.rightTriAcute },
+  { q: 'Каждая из биссектрис равнобедренного треугольника является его медианой.', a: false, e: 'Свойством медианы обладает исключительно та биссектриса, которая проведена к основанию равнобедренного треугольника.', draw: svgs.isoBisector },
+  { q: 'Площадь прямоугольника равна произведению длин всех его сторон.', a: false, e: 'Площадь прямоугольника равна произведению длин двух его смежных сторон: <div class="math-line">S = a · b</div>', draw: svgs.square },
+  { q: 'Если три угла одного треугольника равны соответственно трём углам другого треугольника, то такие треугольники равны.', a: false, e: 'Равенство углов даёт признак подобия, а не равенства треугольников. Более того, для подобия достаточно уже двух равных углов.', draw: svgs.simAngles },
+  { q: 'Через точку, не лежащую на данной прямой, можно провести прямую, параллельную этой прямой.', a: true, e: 'Согласно аксиоме параллельных прямых, через заданную точку можно провести такую прямую, и притом только одну.', draw: svgs.parallelAxiom },
+  { q: 'Любой квадрат является прямоугольником.', a: true, e: 'Прямоугольник — это параллелограмм, у которого все углы прямые. Квадрат полностью удовлетворяет этому определению.', draw: svgs.square },
+  { q: 'Площадь параллелограмма равна половине произведения его диагоналей.', a: false, e: 'Площадь параллелограмма зависит не только от длин диагоналей, но и от угла между ними: <div class="math-line">S = <span class="frac"><span class="num">1</span><span class="den">2</span></span>d1d2 sin(φ)</div> Поэтому без дополнительных условий данное утверждение неверно.', draw: svgs.parallelogram },
+  { q: 'В любой четырёхугольник можно вписать окружность.', a: false, e: 'Окружность можно вписать только в тот выпуклый четырехугольник, у которого суммы длин противоположных сторон равны.', draw: svgs.convexQuad },
+  { q: 'Медиана треугольника делит пополам угол, из вершины которого проведена.', a: false, e: 'Угол делит пополам биссектриса. Медиана соединяет вершину с серединой противоположной стороны.', draw: svgs.median },
+  { q: 'Косинус острого угла прямоугольного треугольника равен отношению гипотенузы к прилежащему к этому углу катету.', a: false, e: 'По определению, косинус равен отношению прилежащего катета к гипотенузе.', draw: svgs.rightTriAcute },
+  { q: 'Биссектриса треугольника делит пополам сторону, к которой проведена.', a: false, e: 'Противоположную сторону делит пополам медиана. Биссектриса делит пополам угол.', draw: svgs.median },
+  { q: 'Существует квадрат, который не является прямоугольником.', a: false, e: 'Квадрат по определению имеет прямые углы, следовательно, любой квадрат автоматически является прямоугольником.', draw: svgs.square },
+  { q: 'Если в параллелограмме две соседние стороны равны, то этот параллелограмм является ромбом.', a: true, e: 'Данное утверждение является одним из определений ромба.', draw: svgs.rhombusSlant },
+  { q: 'Сумма углов любого треугольника равна 360 градусам.', a: false, e: 'Согласно теореме, сумма внутренних углов любого треугольника равна 180°.', draw: svgs.obtuse },
+  { q: 'Серединные перпендикуляры к сторонам треугольника пересекаются в точке, являющейся центром окружности, описанной около треугольника.', a: true, e: 'Это геометрическое свойство серединных перпендикуляров.', draw: svgs.circumcenter },
+  { q: 'Касательная к окружности параллельна радиусу, проведённому в точку касания.', a: false, e: 'По теореме о касательной, она строго перпендикулярна радиусу в точку касания.', draw: svgs.tangentRad },
+  { q: 'Если точка лежит на биссектрисе угла, то она равноудалена от сторон этого угла.', a: true, e: 'Каждая точка биссектрисы неразвернутого угла равноудалена от его сторон.', draw: svgs.bisectorPoint }
+];
+
+let sC = 0; let sW = 0;
+let wrongAnswers = [];
+let activeQuestions = [];
+const actx = new (window.AudioContext || window.webkitAudioContext)();
+
+function beep(ok) {
+  if (actx.state === 'suspended') actx.resume();
+  const o = actx.createOscillator();
+  const g = actx.createGain();
+  o.connect(g); g.connect(actx.destination);
+  
+  if (ok) {
+    o.type = 'sine'; o.frequency.setValueAtTime(600, actx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(1200, actx.currentTime + 0.1);
+    g.gain.setValueAtTime(0.5, actx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.3);
+    o.start(); o.stop(actx.currentTime + 0.3);
+  } else {
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(150, actx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(100, actx.currentTime + 0.2);
+    g.gain.setValueAtTime(0.3, actx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.4);
+    o.start(); o.stop(actx.currentTime + 0.4);
+  }
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+function render() {
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  activeQuestions = [...db].slice(0, 55);
+  shuffle(activeQuestions); 
+  activeQuestions.forEach((q, i) => {
+    const el = document.createElement("div");
+    el.className = "card-wrap";
+    el.id = `c-${i}`;
+    el.innerHTML = `
+      <div class="card-inner">
+        <div class="card-face card-front">
+          <div class="c-num">Утверждение ${i+1}</div>
+          <div class="statement">${q.q}</div>
+          <div class="btn-row" id="br-${i}">
+            <button class="btn-ans btn-t" onclick="ans(${i}, true)">ВЕРНО</button>
+            <button class="btn-ans btn-f" onclick="ans(${i}, false)">НЕВЕРНО</button>
+          </div>
+        </div>
+        <div class="card-face card-back" id="cb-${i}">
+          <div class="res-title" id="rt-${i}">...</div>
+          <div class="fact-badge">На самом деле: ${q.a ? 'Утверждение верное' : 'Утверждение неверное'}</div>
+          ${q.draw ? `<div class="svg-box">${q.draw}</div>` : ''}
+          <div class="expl-text">${q.e}</div>
+        </div>
+      </div>
+    `;
+    grid.appendChild(el);
+  });
+}
+
+function ans(index, userSays) {
+  const q = activeQuestions[index];
+  const ok = (userSays === q.a);
+  const wrap = document.getElementById(`c-${index}`);
+  if (wrap.classList.contains('flipped')) return;
+  document.getElementById(`br-${index}`).querySelectorAll('button').forEach(b => b.disabled = true);
+  const title = document.getElementById(`rt-${index}`);
+  const back = document.getElementById(`cb-${index}`);
+  if (ok) {
+    sC++; document.getElementById("sCorr").innerText = sC;
+    title.innerText = "ПРАВИЛЬНО!"; title.style.color = "var(--correct)";
+    back.style.borderColor = "var(--correct)";
+  } else {
+    sW++; document.getElementById("sWrng").innerText = sW;
+    title.innerText = "ОШИБКА!"; title.style.color = "var(--wrong)";
+    back.style.borderColor = "var(--wrong)";
+    wrongAnswers.push(q);
+  }
+  beep(ok);
+  wrap.classList.add('flipped');
+}
+
+function showSummary() {
+  const modal = document.getElementById('summaryModal');
+  const body = document.getElementById('modalBody');
+  body.innerHTML = '';
+  if (wrongAnswers.length === 0 && sC === 0) {
+    body.innerHTML = `<div class="success-msg" style="color:var(--text-muted)">Вы еще не ответили ни на одно утверждение.</div>`;
+  } else if (wrongAnswers.length === 0) {
+    body.innerHTML = `<div class="success-msg">🎉 Ошибок нет! Вы отлично справились.</div>`;
+  } else {
+    let html = `<h3 style="margin-top:0; color:var(--text-dark);">Утверждения, в которых допущены ошибки:</h3><div class="error-list">`;
+    wrongAnswers.forEach(item => {
+      html += `<div class="error-item"><div class="err-q">❌ ${item.q}</div><div class="err-e"><b>Академическая справка:</b> ${item.e}</div></div>`;
+    });
+    html += `</div>`;
+    body.innerHTML = html;
+  }
+  modal.style.display = 'flex';
+}
+
+function closeSummary() { document.getElementById('summaryModal').style.display = 'none'; }
+function resetAll() { if(confirm("Начать заново? Статистика обнулится.")) { sC = 0; sW = 0; wrongAnswers = []; document.getElementById("sCorr").innerText = "0"; document.getElementById("sWrng").innerText = "0"; render(); } }
+render();
+</script>
+</body>
+</html>
